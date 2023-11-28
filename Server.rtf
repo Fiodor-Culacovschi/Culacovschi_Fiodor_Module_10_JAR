@@ -1,0 +1,156 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2639
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fmodern\fcharset0 Courier;\f1\fmodern\fcharset0 Courier-Oblique;}
+{\colortbl;\red255\green255\blue255;\red195\green123\blue90;\red23\green23\blue26;\red174\green176\blue183;
+\red103\green107\blue114;\red185\green101\blue173;\red71\green149\blue242;\red89\green158\blue96;\red38\green157\blue169;
+}
+{\*\expandedcolortbl;;\csgenericrgb\c76471\c48235\c35294;\csgenericrgb\c9020\c9020\c10196;\csgenericrgb\c68235\c69020\c71765;
+\csgenericrgb\c40392\c41961\c44706;\csgenericrgb\c72549\c39608\c67843;\csgenericrgb\c27843\c58431\c94902;\csgenericrgb\c34902\c61961\c37647;\csgenericrgb\c14902\c61569\c66275;
+}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\f0\fs26 \cf2 \cb3 package \cf4 chapter33;\
+\
+\cf2 import \cf4 javax.swing.*;\
+\cf2 import \cf4 java.awt.*;\
+\cf2 import \cf4 java.io.DataInputStream;\
+\cf2 import \cf4 java.io.DataOutputStream;\
+\cf2 import \cf4 java.io.IOException;\
+\cf2 import \cf4 java.net.ServerSocket;\
+\cf2 import \cf4 java.net.Socket;\
+\cf2 import \cf4 java.text.SimpleDateFormat;\
+\cf2 import \cf4 java.util.Date;\
+\
+\cf2 public class \cf4 Server \{\
+\
+    \cf5 // TextArea to display messages from the server\
+    \cf2 private static \cf4 JTextArea 
+\f1\i \cf6 serverMessageTextArea
+\f0\i0 \cf4 ;\
+\
+    \cf2 public static void \cf7 main\cf4 (String[] args) \{\
+        \cf5 // Create the main frame for the server\
+        \cf4 JFrame serverFrame = \cf2 new \cf4 JFrame(\cf8 "Server"\cf4 );\
+        serverFrame.setDefaultCloseOperation(JFrame.
+\f1\i \cf6 EXIT_ON_CLOSE
+\f0\i0 \cf4 );\
+        serverFrame.setSize(\cf9 400\cf4 , \cf9 300\cf4 );\
+\
+        \cf5 // Create and configure the server message text area\
+        
+\f1\i \cf6 serverMessageTextArea 
+\f0\i0 \cf4 = \cf2 new \cf4 JTextArea();\
+        
+\f1\i \cf6 serverMessageTextArea
+\f0\i0 \cf4 .setEditable(\cf2 false\cf4 );\
+        serverFrame.add(\cf2 new \cf4 JScrollPane(
+\f1\i \cf6 serverMessageTextArea
+\f0\i0 \cf4 ), BorderLayout.
+\f1\i \cf6 CENTER
+\f0\i0 \cf4 );\
+\
+        \cf5 // Make the server frame visible\
+        \cf4 serverFrame.setVisible(\cf2 true\cf4 );\
+\
+        \cf5 // Display timestamp at the top\
+        
+\f1\i \cf4 displayMessageInServer
+\f0\i0 (
+\f1\i getCurrentTimestamp
+\f0\i0 () + \cf8 " Server started. Waiting for clients..."\cf4 );\
+\
+        \cf5 // Start the server\
+        
+\f1\i \cf4 startServer
+\f0\i0 ();\
+    \}\
+\
+    \cf5 // Method to start the server and listen for client connections\
+    \cf2 private static void \cf7 startServer\cf4 () \{\
+        \cf2 try \cf4 \{\
+            \cf5 // Create a server socket on port 8000\
+            \cf4 ServerSocket serverSocket = \cf2 new \cf4 ServerSocket(\cf9 8000\cf4 );\
+\
+            \cf5 // Continuously listen for incoming client connections\
+            \cf2 while \cf4 (\cf2 true\cf4 ) \{\
+                \cf5 // Accept a client connection\
+                \cf4 Socket clientSocket = serverSocket.accept();\
+\
+                \cf5 // Handle client communication in a separate thread\
+                \cf2 new \cf4 Thread(() -> 
+\f1\i handleClient
+\f0\i0 (\cf6 clientSocket\cf4 )).start();\
+            \}\
+        \} \cf2 catch \cf4 (IOException e) \{\
+            \cf5 // Handle IOException\
+            \cf4 e.printStackTrace();\
+        \}\
+    \}\
+\
+    \cf5 // Method to handle communication with a connected client\
+    \cf2 private static void \cf7 handleClient\cf4 (Socket clientSocket) \{\
+        \cf2 try \cf4 \{\
+            \cf5 // Create DataInputStream to receive data from the client\
+            \cf4 DataInputStream fromClient = \cf2 new \cf4 DataInputStream(clientSocket.getInputStream());\
+\
+            \cf5 // Receive the number from the client\
+            \cf2 int \cf4 number = fromClient.readInt();\
+\
+            \cf5 // Display message in the server window\
+            
+\f1\i \cf4 displayMessageInServer
+\f0\i0 (\cf8 "Number received from client: " \cf4 + number);\
+\
+            \cf5 // Check if the number is prime\
+            \cf2 boolean \cf4 isPrime = 
+\f1\i isPrime
+\f0\i0 (number);\
+\
+            \cf5 // Create DataOutputStream to send data back to the client\
+            \cf4 DataOutputStream toClient = \cf2 new \cf4 DataOutputStream(clientSocket.getOutputStream());\
+\
+            \cf5 // Send the response back to the client\
+            \cf4 toClient.writeBoolean(isPrime);\
+            toClient.flush();\
+\
+            \cf5 // Close the client socket\
+            \cf4 clientSocket.close();\
+        \} \cf2 catch \cf4 (IOException e) \{\
+            \cf5 // Handle IOException\
+            \cf4 e.printStackTrace();\
+        \}\
+    \}\
+\
+    \cf5 // Method to check if a number is prime\
+    \cf2 private static boolean \cf7 isPrime\cf4 (\cf2 int \cf4 number) \{\
+        \cf2 if \cf4 (number <= \cf9 1\cf4 ) \{\
+            \cf2 return false\cf4 ;\
+        \}\
+        \cf2 for \cf4 (\cf2 int \cf4 i = \cf9 2\cf4 ; i <= Math.
+\f1\i sqrt
+\f0\i0 (number); i++) \{\
+            \cf2 if \cf4 (number % i == \cf9 0\cf4 ) \{\
+                \cf2 return false\cf4 ;\
+            \}\
+        \}\
+        \cf2 return true\cf4 ;\
+    \}\
+\
+    \cf5 // Method to display a message in the server window\
+    \cf2 private static void \cf7 displayMessageInServer\cf4 (String message) \{\
+        SwingUtilities.
+\f1\i invokeLater
+\f0\i0 (() -> 
+\f1\i \cf6 serverMessageTextArea
+\f0\i0 \cf4 .append(\cf6 message \cf4 + \cf8 "\cf2 \\n\cf8 "\cf4 ));\
+    \}\
+\
+    \cf5 // Method to get the current timestamp\
+    \cf2 private static \cf4 String \cf7 getCurrentTimestamp\cf4 () \{\
+        SimpleDateFormat sdf = \cf2 new \cf4 SimpleDateFormat(\cf8 "E MMM dd HH:mm:ss z yyyy"\cf4 );\
+        Date date = \cf2 new \cf4 Date();\
+        \cf2 return \cf4 sdf.format(date) + \cf8 "; "\cf4 ;\
+    \}\
+\}\
+\
+}
